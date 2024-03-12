@@ -1,0 +1,35 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sun_fo_timer/repository/shared_preferences_repository.dart';
+import 'package:sun_fo_timer/ui/timer/view/timer_view.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  WakelockPlus.enable();
+  late final SharedPreferences sharedPreferences;
+  sharedPreferences = await SharedPreferences.getInstance();
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
+  runApp(ProviderScope(
+    overrides: [
+      sharedPreferencesRepositoryProvider.overrideWithValue(SharedPreferencesRepository(sharedPreferences)),
+    ],
+    child: const MyApp(),
+  ));
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: TimerView(),
+    );
+  }
+}
