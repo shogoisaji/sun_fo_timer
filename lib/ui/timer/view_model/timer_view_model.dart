@@ -8,7 +8,6 @@ import 'package:sun_fo_timer/models/app_state.dart';
 import 'package:sun_fo_timer/models/timer_model.dart';
 import 'package:sun_fo_timer/repository/shared_preferences_keys.dart';
 import 'package:sun_fo_timer/repository/shared_preferences_repository.dart';
-import 'package:sun_fo_timer/ui/config/haptic_config.dart';
 import 'package:sun_fo_timer/ui/timer/view_model/timer_state.dart';
 import 'package:sun_fo_timer/ui/widgets/custom_bottom_sheet.dart';
 
@@ -207,6 +206,11 @@ class TimerViewModel extends _$TimerViewModel {
   void setBrightness(double brightness) {
     state = state.copyWith(myBrightness: brightness);
     ref.read(sharedPreferencesRepositoryProvider).setDouble(SharedPreferencesKey.brightness, brightness);
+  }
+
+  void clearBrightness() {
+    state = state.copyWith(myBrightness: null);
+    ref.read(sharedPreferencesRepositoryProvider).clearPref(SharedPreferencesKey.brightness);
   }
 
   void updateDisplayMinutes(int minutes) {

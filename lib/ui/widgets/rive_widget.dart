@@ -42,7 +42,6 @@ class _RiveWidgetState extends ConsumerState<RiveWidget> with TickerProviderStat
   SMIInput<bool>? _isSunStartRotate;
   SMIInput<bool>? _isAppearStart;
   SMIInput<bool>? _isSliderEnable;
-  SMIInput<bool>? _isSliderDragged;
   SMIInput<bool>? _isComplete;
 
   /// Riveの表示Minutesを更新
@@ -69,32 +68,6 @@ class _RiveWidgetState extends ConsumerState<RiveWidget> with TickerProviderStat
   /// RiveAnimationからのコールバック 変更があったAnimation名がStringで返される
   _onStateChange(String stateMachineName, String stateName) {
     widget.getCurrentAnimation(stateName);
-    switch (stateName) {
-      case 'setting_on':
-
-        ///設定時間にスライダーを合わせる
-        ///TODO: Rive側でできそう
-        // _slider!.value = widget.timerState.timerModel.settingMinutes.toDouble();
-        // _isSliderDragged!.value = true;
-        // _isSliderEnable!.value = true;
-        // if (widget.timerState.timerModel.appState != AppState.idle &&
-        //     widget.timerState.timerModel.appState != AppState.standby) {
-        //   Future.delayed(const Duration(milliseconds: 10), () {
-        //     _isSliderDragged!.value = false;
-        //     _isSliderEnable!.value = false;
-        //   });
-        // }
-
-        break;
-      case 'down_reset?':
-        _isSliderDragged!.value = true;
-        Future.delayed(const Duration(milliseconds: 100), () {
-          _isSliderDragged!.value = false;
-        });
-        break;
-      default:
-        break;
-    }
   }
 
   /// RiveAnimationの初期化
@@ -121,7 +94,6 @@ class _RiveWidgetState extends ConsumerState<RiveWidget> with TickerProviderStat
     _isSunRotate = controller.findInput<bool>('is_sun_rotate') as SMIBool;
     _isSunStartRotate = controller.findInput<bool>('is_sun_start_rotate') as SMIBool;
     _isSliderEnable = controller.findInput<bool>('is_slider_enable') as SMIBool;
-    _isSliderDragged = controller.findInput<bool>('is_slider_dragged') as SMIBool;
     _isComplete = controller.findInput<bool>('is_complete') as SMIBool;
     _countType = controller.findInput<double>('count') as SMINumber;
 
@@ -129,6 +101,7 @@ class _RiveWidgetState extends ConsumerState<RiveWidget> with TickerProviderStat
     _isPause!.value = false;
     _isSliderEnable!.value = true;
     _sunRise!.value = 100;
+    _slider!.value = 100;
     _countType!.value = 5;
     _isSunRotate!.value = false;
     _isShowReset!.value = false;
@@ -228,10 +201,6 @@ class _RiveWidgetState extends ConsumerState<RiveWidget> with TickerProviderStat
     super.dispose();
   }
 
-  // void loadTimerModel() {
-  //   ref.read(timerViewModelProvider.notifier).loadTimerModel();
-  // }
-
   @override
   Widget build(BuildContext context) {
     final w = MediaQuery.sizeOf(context).width;
@@ -255,8 +224,6 @@ class _RiveWidgetState extends ConsumerState<RiveWidget> with TickerProviderStat
     }
 
     useEffect(() {
-      // loadTimerModel();
-
       /// 常時更新用
       _tickTimer = Timer.periodic(const Duration(milliseconds: 30), (Timer t) {
         /// Rive Widget Build Check
@@ -279,7 +246,6 @@ class _RiveWidgetState extends ConsumerState<RiveWidget> with TickerProviderStat
     useEffect(() {
       if (!_isRiveBuilded.value) return;
       updateRiveState();
-      print('updateRiveState${_timerState.timerModel.appState}');
       return null;
     }, [_timerState.timerModel.appState]);
 
@@ -318,46 +284,7 @@ class _RiveWidgetState extends ConsumerState<RiveWidget> with TickerProviderStat
             ],
           ),
         ),
-        // widget.timerState.timerModel.appState == AppState.idle ||
-        //         widget.timerState.timerModel.appState == AppState.standby
-        //     ? _SliderTouchArea(
-        //         riveWidgetPosition: _riveWidgetPosition,
-        //         riveWidgetSize: _riveWidgetSize,
-        //         handleSliderUpdate: updateSliderValue,
-        //       )
-        //     : Container(),
       ],
     );
   }
 }
-
-// class _SliderTouchArea extends StatelessWidget {
-//   final Offset riveWidgetPosition;
-//   final Size riveWidgetSize;
-//   final Function handleSliderUpdate;
-//   const _SliderTouchArea({
-//     required this.riveWidgetPosition,
-//     required this.riveWidgetSize,
-//     required this.handleSliderUpdate,
-//   });
-
-//   static const double _areaUpperRate = 0.24;
-//   static const double _areaLowerRate = 0.75;
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Positioned(
-//       left: riveWidgetPosition.dx + riveWidgetSize.width - riveWidgetSize.height * 0.14,
-//       top: riveWidgetPosition.dy + riveWidgetSize.height * _areaUpperRate,
-//       child: GestureDetector(
-//         onPanUpdate: (details) {
-//           handleSliderUpdate(details.delta.dy / riveWidgetSize.height * (_areaLowerRate - _areaUpperRate) * 4);
-//         },
-//         child: Container(
-//             width: riveWidgetSize.height * 0.1,
-//             height: riveWidgetSize.height * (_areaLowerRate - _areaUpperRate),
-//             color: Colors.green.withOpacity(0.3)),
-//       ),
-//     );
-//   }
-// }

@@ -32,6 +32,7 @@ class CustomBottomSheet extends HookConsumerWidget {
       }
       return null;
     }, [_brightness]);
+
     return Padding(
       padding: const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 32),
       child: Container(
@@ -139,6 +140,7 @@ class CustomBottomSheet extends HookConsumerWidget {
                           BrightnessUtil().setBrightness(_brightness);
                         } else {
                           _pref.clearPref(SharedPreferencesKey.brightness);
+                          ref.read(timerViewModelProvider.notifier).clearBrightness();
                           BrightnessUtil().resetBrightness();
                         }
                       },
@@ -189,6 +191,7 @@ class CustomBottomSheet extends HookConsumerWidget {
                     backgroundColor: Colors.blueGrey.shade100,
                   ),
                   onPressed: () {
+                    HapticFeedback.lightImpact();
                     showDialog(
                       context: context,
                       builder: (context) => AlertDialog(
@@ -205,6 +208,7 @@ class CustomBottomSheet extends HookConsumerWidget {
                                 padding: const EdgeInsets.all(0),
                               ),
                               onPressed: () {
+                                HapticFeedback.lightImpact();
                                 Navigator.pop(context);
                               },
                               child: Text('キャンセル', style: TextStyle(color: Colors.blueGrey.shade800, fontSize: 16)),
