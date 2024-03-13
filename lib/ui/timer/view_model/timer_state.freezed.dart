@@ -23,6 +23,9 @@ mixin _$TimerState {
   double get rivePositionY => throw _privateConstructorUsedError;
   double get riveWidth => throw _privateConstructorUsedError;
   double get riveHeight => throw _privateConstructorUsedError;
+  double get countType => throw _privateConstructorUsedError;
+  double? get myBrightness => throw _privateConstructorUsedError;
+  int get bgColor => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $TimerStateCopyWith<TimerState> get copyWith =>
@@ -42,7 +45,10 @@ abstract class $TimerStateCopyWith<$Res> {
       double rivePositionX,
       double rivePositionY,
       double riveWidth,
-      double riveHeight});
+      double riveHeight,
+      double countType,
+      double? myBrightness,
+      int bgColor});
 
   $TimerModelCopyWith<$Res> get timerModel;
 }
@@ -67,6 +73,9 @@ class _$TimerStateCopyWithImpl<$Res, $Val extends TimerState>
     Object? rivePositionY = null,
     Object? riveWidth = null,
     Object? riveHeight = null,
+    Object? countType = null,
+    Object? myBrightness = freezed,
+    Object? bgColor = null,
   }) {
     return _then(_value.copyWith(
       timerModel: null == timerModel
@@ -97,6 +106,18 @@ class _$TimerStateCopyWithImpl<$Res, $Val extends TimerState>
           ? _value.riveHeight
           : riveHeight // ignore: cast_nullable_to_non_nullable
               as double,
+      countType: null == countType
+          ? _value.countType
+          : countType // ignore: cast_nullable_to_non_nullable
+              as double,
+      myBrightness: freezed == myBrightness
+          ? _value.myBrightness
+          : myBrightness // ignore: cast_nullable_to_non_nullable
+              as double?,
+      bgColor: null == bgColor
+          ? _value.bgColor
+          : bgColor // ignore: cast_nullable_to_non_nullable
+              as int,
     ) as $Val);
   }
 
@@ -124,7 +145,10 @@ abstract class _$$TimerStateImplCopyWith<$Res>
       double rivePositionX,
       double rivePositionY,
       double riveWidth,
-      double riveHeight});
+      double riveHeight,
+      double countType,
+      double? myBrightness,
+      int bgColor});
 
   @override
   $TimerModelCopyWith<$Res> get timerModel;
@@ -148,6 +172,9 @@ class __$$TimerStateImplCopyWithImpl<$Res>
     Object? rivePositionY = null,
     Object? riveWidth = null,
     Object? riveHeight = null,
+    Object? countType = null,
+    Object? myBrightness = freezed,
+    Object? bgColor = null,
   }) {
     return _then(_$TimerStateImpl(
       timerModel: null == timerModel
@@ -178,6 +205,18 @@ class __$$TimerStateImplCopyWithImpl<$Res>
           ? _value.riveHeight
           : riveHeight // ignore: cast_nullable_to_non_nullable
               as double,
+      countType: null == countType
+          ? _value.countType
+          : countType // ignore: cast_nullable_to_non_nullable
+              as double,
+      myBrightness: freezed == myBrightness
+          ? _value.myBrightness
+          : myBrightness // ignore: cast_nullable_to_non_nullable
+              as double?,
+      bgColor: null == bgColor
+          ? _value.bgColor
+          : bgColor // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }
@@ -192,7 +231,10 @@ class _$TimerStateImpl implements _TimerState {
       this.rivePositionX = 0.0,
       this.rivePositionY = 0.0,
       this.riveWidth = 0.0,
-      this.riveHeight = 0.0});
+      this.riveHeight = 0.0,
+      this.countType = 5.0,
+      this.myBrightness,
+      this.bgColor = 0});
 
   @override
   final TimerModel timerModel;
@@ -214,10 +256,18 @@ class _$TimerStateImpl implements _TimerState {
   @override
   @JsonKey()
   final double riveHeight;
+  @override
+  @JsonKey()
+  final double countType;
+  @override
+  final double? myBrightness;
+  @override
+  @JsonKey()
+  final int bgColor;
 
   @override
   String toString() {
-    return 'TimerState(timerModel: $timerModel, displayMinutes: $displayMinutes, prevDisplayMinutes: $prevDisplayMinutes, rivePositionX: $rivePositionX, rivePositionY: $rivePositionY, riveWidth: $riveWidth, riveHeight: $riveHeight)';
+    return 'TimerState(timerModel: $timerModel, displayMinutes: $displayMinutes, prevDisplayMinutes: $prevDisplayMinutes, rivePositionX: $rivePositionX, rivePositionY: $rivePositionY, riveWidth: $riveWidth, riveHeight: $riveHeight, countType: $countType, myBrightness: $myBrightness, bgColor: $bgColor)';
   }
 
   @override
@@ -238,12 +288,27 @@ class _$TimerStateImpl implements _TimerState {
             (identical(other.riveWidth, riveWidth) ||
                 other.riveWidth == riveWidth) &&
             (identical(other.riveHeight, riveHeight) ||
-                other.riveHeight == riveHeight));
+                other.riveHeight == riveHeight) &&
+            (identical(other.countType, countType) ||
+                other.countType == countType) &&
+            (identical(other.myBrightness, myBrightness) ||
+                other.myBrightness == myBrightness) &&
+            (identical(other.bgColor, bgColor) || other.bgColor == bgColor));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, timerModel, displayMinutes,
-      prevDisplayMinutes, rivePositionX, rivePositionY, riveWidth, riveHeight);
+  int get hashCode => Object.hash(
+      runtimeType,
+      timerModel,
+      displayMinutes,
+      prevDisplayMinutes,
+      rivePositionX,
+      rivePositionY,
+      riveWidth,
+      riveHeight,
+      countType,
+      myBrightness,
+      bgColor);
 
   @JsonKey(ignore: true)
   @override
@@ -260,7 +325,10 @@ abstract class _TimerState implements TimerState {
       final double rivePositionX,
       final double rivePositionY,
       final double riveWidth,
-      final double riveHeight}) = _$TimerStateImpl;
+      final double riveHeight,
+      final double countType,
+      final double? myBrightness,
+      final int bgColor}) = _$TimerStateImpl;
 
   @override
   TimerModel get timerModel;
@@ -276,6 +344,12 @@ abstract class _TimerState implements TimerState {
   double get riveWidth;
   @override
   double get riveHeight;
+  @override
+  double get countType;
+  @override
+  double? get myBrightness;
+  @override
+  int get bgColor;
   @override
   @JsonKey(ignore: true)
   _$$TimerStateImplCopyWith<_$TimerStateImpl> get copyWith =>

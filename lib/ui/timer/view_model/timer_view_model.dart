@@ -8,6 +8,7 @@ import 'package:sun_fo_timer/models/app_state.dart';
 import 'package:sun_fo_timer/models/timer_model.dart';
 import 'package:sun_fo_timer/repository/shared_preferences_keys.dart';
 import 'package:sun_fo_timer/repository/shared_preferences_repository.dart';
+import 'package:sun_fo_timer/ui/config/haptic_config.dart';
 import 'package:sun_fo_timer/ui/timer/view_model/timer_state.dart';
 import 'package:sun_fo_timer/ui/widgets/custom_bottom_sheet.dart';
 
@@ -31,6 +32,9 @@ class TimerViewModel extends _$TimerViewModel {
   void getCurrentAnimation(String animationName) {
     print('Rive : $animationName');
 
+    ///haptic feedback
+    if (animationName == 'haptic_call') HapticFeedback.lightImpact();
+
     /// sliderから始まるanimationをまとめて処理
     if (animationName.startsWith('slider') &&
         (state.timerModel.appState == AppState.idle || state.timerModel.appState == AppState.standby)) {
@@ -41,8 +45,15 @@ class TimerViewModel extends _$TimerViewModel {
       }
       final minutes = int.tryParse(minutesString);
       if (minutes != null) {
+        final countType = state.countType;
+        if (countType == 1) {
+          updateDisplayMinutes(minutes ~/ 5);
+          HapticFeedback.lightImpact();
+          print('slider displayMinutes: $minutes');
+          return;
+        }
         updateDisplayMinutes(minutes);
-        HapticFeedback.selectionClick();
+        HapticFeedback.lightImpact();
         print('slider displayMinutes: $minutes');
         return;
       }
@@ -82,6 +93,12 @@ class TimerViewModel extends _$TimerViewModel {
       case 'down_complete':
         resetTimer();
         break;
+      case 'count1':
+        changeCountType(1);
+        break;
+      case 'count5':
+        changeCountType(5);
+        break;
       default:
         break;
     }
@@ -91,12 +108,14 @@ class TimerViewModel extends _$TimerViewModel {
     showModalBottomSheet(
       context: context,
       useSafeArea: true,
+      isScrollControlled: true,
       backgroundColor: Colors.transparent,
       barrierColor: Colors.transparent,
       builder: (BuildContext context) {
+        final w = MediaQuery.of(context).size.width;
         return CustomBottomSheet(
           state: state,
-          width: MediaQuery.of(context).size.width,
+          width: w > 500 ? 500 : w,
         );
       },
     );
@@ -115,12 +134,31 @@ class TimerViewModel extends _$TimerViewModel {
     return null;
   }
 
+  Future<void> loadSettings() async {
+    final _pref = ref.read(sharedPreferencesRepositoryProvider);
+    try {
+      final results = await Future.wait([
+        _pref.getDouble(SharedPreferencesKey.bgColor),
+        _pref.getDouble(SharedPreferencesKey.brightness),
+      ]);
+
+      final _bgColor = results[0];
+      final _brightness = results[1];
+
+      if (_bgColor != null) {
+        /// brightnessの設定がない場合はnull
+        state = state.copyWith(myBrightness: _brightness, bgColor: _bgColor.toInt());
+      }
+    } catch (error) {
+      _handleError('loadSettings', error);
+    }
+  }
+
   Future<void> loadTimerModel() async {
     final _fetchTimerModel = await fetchTimerModel();
     await Future.delayed(const Duration(milliseconds: 0), () {}); // build後に実行される
     if (_fetchTimerModel == null) {
       print('loaded TimerModel : null');
-      resetTimer();
       return;
     }
     switch (_fetchTimerModel.appState) {
@@ -134,9 +172,10 @@ class TimerViewModel extends _$TimerViewModel {
             .add(Duration(minutes: _fetchTimerModel.settingMinutes) + _fetchTimerModel.pauseAmount);
         if (DateTime.now().isAfter(_endDateTime)) {
           print('repository timerModel is play -> completed');
-          resetTimer();
-          break;
+          state = state.copyWith(timerModel: _fetchTimerModel.copyWith(appState: AppState.complete), displayMinutes: 0);
         }
+        break;
+
       case AppState.complete:
         print('repository timerModel is completed');
         resetTimer();
@@ -165,8 +204,22 @@ class TimerViewModel extends _$TimerViewModel {
     state = state.copyWith(timerModel: _fetchTimerModel);
   }
 
+  void setBrightness(double brightness) {
+    state = state.copyWith(myBrightness: brightness);
+    ref.read(sharedPreferencesRepositoryProvider).setDouble(SharedPreferencesKey.brightness, brightness);
+  }
+
   void updateDisplayMinutes(int minutes) {
     state = state.copyWith(displayMinutes: minutes);
+  }
+
+  void changeCountType(double countNumber) {
+    state = state.copyWith(countType: countNumber);
+  }
+
+  void changeBgColor(int index) {
+    state = state.copyWith(bgColor: index);
+    ref.read(sharedPreferencesRepositoryProvider).setDouble(SharedPreferencesKey.bgColor, index.toDouble());
   }
 
   Duration? calculateRemainingDuration() {

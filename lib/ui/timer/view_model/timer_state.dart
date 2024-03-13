@@ -6,13 +6,15 @@ part 'timer_state.freezed.dart';
 
 @freezed
 class TimerState with _$TimerState {
-  const factory TimerState({
-    required TimerModel timerModel,
-    @Default(0) int displayMinutes,
-    @Default(0) int prevDisplayMinutes,
-    @Default(0.0) double rivePositionX,
-    @Default(0.0) double rivePositionY,
-    @Default(0.0) double riveWidth,
-    @Default(0.0) double riveHeight,
-  }) = _TimerState;
+  const factory TimerState(
+      {required TimerModel timerModel,
+      @Default(0) int displayMinutes,
+      @Default(0) int prevDisplayMinutes,
+      @Default(0.0) double rivePositionX,
+      @Default(0.0) double rivePositionY,
+      @Default(0.0) double riveWidth,
+      @Default(0.0) double riveHeight,
+      @Default(5.0) double countType,
+      double? myBrightness,
+      @Default(0) int bgColor}) = _TimerState;
 }

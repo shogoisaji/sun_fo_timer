@@ -1,22 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sun_fo_timer/ui/config/color_theme.dart';
 import 'package:sun_fo_timer/ui/timer/view_model/timer_view_model.dart';
 import 'package:sun_fo_timer/ui/widgets/rive_widget.dart';
 
-class TimerView extends ConsumerWidget {
+class TimerView extends HookConsumerWidget {
   const TimerView({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final _timerState = ref.watch(timerViewModelProvider);
+    final _bgColorIndex = _timerState.bgColor;
 
     void getCurrentAnimation(String animationName) {
       ref.read(timerViewModelProvider.notifier).getCurrentAnimation(animationName);
+
+      /// contextが必要なのでbottomSheetはここで呼ぶ
       if (animationName == 'selector') {
         ref.read(timerViewModelProvider.notifier).showBottomSheet(context);
       }
     }
+
+    void initialLoad() {
+      ref.read(timerViewModelProvider.notifier).loadSettings();
+      ref.read(timerViewModelProvider.notifier).loadTimerModel();
+    }
+
+    useEffect(() {
+      initialLoad();
+      return;
+    }, []);
 
     return Scaffold(
       body: Container(
@@ -25,8 +39,8 @@ class TimerView extends ConsumerWidget {
             begin: const Alignment(-1.5, -1.0),
             end: const Alignment(1.5, 1.0),
             colors: [
-              Color(ColorTheme.bg1[0]),
-              Color(ColorTheme.bg1[1]),
+              Color(ColorTheme.bgColors[_bgColorIndex][0]),
+              Color(ColorTheme.bgColors[_bgColorIndex][1]),
             ],
           ),
         ),
@@ -34,54 +48,14 @@ class TimerView extends ConsumerWidget {
           child: Center(
             child: Stack(
               children: <Widget>[
-                Container(
+                SizedBox(
                   width: double.infinity,
                   height: double.infinity,
                   child: RiveWidget(
                     timerState: _timerState,
-                    // setTimer: setTimer,
-                    // startTimer: startTimer,
-                    // pauseTimer: pauseTimer,
-                    // playTimer: playTimer,
-                    // resetTimer: resetTimer,
-                    // completeTimer: completeTimer,
-                    // updateDisplayMinutes: updateDisplayMinutes,
                     getCurrentAnimation: getCurrentAnimation,
                   ),
                 ),
-                // _timerState.timerModel.appState == AppState.complete
-                //     ? Center(
-                //         child: Container(
-                //           width: 200,
-                //           height: 200,
-                //           decoration: BoxDecoration(
-                //             color: Colors.white,
-                //             borderRadius: BorderRadius.circular(20),
-                //           ),
-                //           child: Column(
-                //             children: [
-                //               const Center(
-                //                 child: Text(
-                //                   'Complete!',
-                //                   style: TextStyle(
-                //                     fontSize: 32,
-                //                     fontWeight: FontWeight.bold,
-                //                     color: Colors.blue,
-                //                   ),
-                //                 ),
-                //               ),
-                //               ElevatedButton(
-                //                 onPressed: () {
-                //                   resetTimer();
-                //                 },
-                //                 child: const Text('Reset'),
-                //               ),
-                //             ],
-                //           ),
-                //         ),
-                //       )
-                //     : Container(),
-                Align(alignment: Alignment.topCenter, child: Text(_timerState.timerModel.appState.toString())),
               ],
             ),
           ),

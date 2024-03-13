@@ -34,6 +34,7 @@ class _RiveWidgetState extends ConsumerState<RiveWidget> with TickerProviderStat
   SMIInput<double>? _time2;
   SMIInput<double>? _time3;
   SMIInput<double>? _time4;
+  SMIInput<double>? _countType;
   SMIInput<bool>? _isPlay;
   SMIInput<bool>? _isPause;
   SMIInput<bool>? _isShowReset;
@@ -42,13 +43,12 @@ class _RiveWidgetState extends ConsumerState<RiveWidget> with TickerProviderStat
   SMIInput<bool>? _isAppearStart;
   SMIInput<bool>? _isSliderEnable;
   SMIInput<bool>? _isSliderDragged;
-  SMIInput<bool>? _isDownSelector;
   SMIInput<bool>? _isComplete;
 
   /// Riveの表示Minutesを更新
   void _updateRiveDisplayMinutes() {
     if (_count10 == null || _count0 == null) {
-      print('count10 or count0 is null');
+      print('updateRiveDisplayMinutes():count10 or count0 is null');
       return;
     }
     final m = widget.timerState.displayMinutes;
@@ -74,16 +74,16 @@ class _RiveWidgetState extends ConsumerState<RiveWidget> with TickerProviderStat
 
         ///設定時間にスライダーを合わせる
         ///TODO: Rive側でできそう
-        _slider!.value = widget.timerState.timerModel.settingMinutes.toDouble();
-        _isSliderDragged!.value = true;
-        _isSliderEnable!.value = true;
-        if (widget.timerState.timerModel.appState == AppState.play ||
-            widget.timerState.timerModel.appState == AppState.start) {
-          Future.delayed(const Duration(milliseconds: 10), () {
-            _isSliderDragged!.value = false;
-            _isSliderEnable!.value = false;
-          });
-        }
+        // _slider!.value = widget.timerState.timerModel.settingMinutes.toDouble();
+        // _isSliderDragged!.value = true;
+        // _isSliderEnable!.value = true;
+        // if (widget.timerState.timerModel.appState != AppState.idle &&
+        //     widget.timerState.timerModel.appState != AppState.standby) {
+        //   Future.delayed(const Duration(milliseconds: 10), () {
+        //     _isSliderDragged!.value = false;
+        //     _isSliderEnable!.value = false;
+        //   });
+        // }
 
         break;
       case 'down_reset?':
@@ -92,8 +92,6 @@ class _RiveWidgetState extends ConsumerState<RiveWidget> with TickerProviderStat
           _isSliderDragged!.value = false;
         });
         break;
-      case 'selector':
-        _isDownSelector!.value = false;
       default:
         break;
     }
@@ -124,18 +122,17 @@ class _RiveWidgetState extends ConsumerState<RiveWidget> with TickerProviderStat
     _isSunStartRotate = controller.findInput<bool>('is_sun_start_rotate') as SMIBool;
     _isSliderEnable = controller.findInput<bool>('is_slider_enable') as SMIBool;
     _isSliderDragged = controller.findInput<bool>('is_slider_dragged') as SMIBool;
-    _isDownSelector = controller.findInput<bool>('is_down_selector') as SMIBool;
     _isComplete = controller.findInput<bool>('is_complete') as SMIBool;
+    _countType = controller.findInput<double>('count') as SMINumber;
 
     _isPlay!.value = false;
     _isPause!.value = false;
     _isSliderEnable!.value = true;
-    // _slider!.value = 0;
     _sunRise!.value = 100;
+    _countType!.value = 5;
     _isSunRotate!.value = false;
     _isShowReset!.value = false;
     _isAppearStart!.value = false;
-    _isDownSelector!.value = false;
     _isComplete!.value = false;
   }
 
@@ -143,8 +140,9 @@ class _RiveWidgetState extends ConsumerState<RiveWidget> with TickerProviderStat
     switch (widget.timerState.timerModel.appState) {
       case AppState.idle:
         print('AppState.idle');
-        // _slider!.value = 0;
+        _countType!.value = widget.timerState.countType.toDouble();
         _sunRise!.value = 100;
+        _slider!.value = 100;
         _isPlay!.value = false;
         _isPause!.value = false;
         _isSliderEnable!.value = true;
@@ -169,6 +167,7 @@ class _RiveWidgetState extends ConsumerState<RiveWidget> with TickerProviderStat
         break;
       case AppState.start:
         print('AppState.start');
+        _countType!.value = 0;
         _isPlay!.value = true;
         _isPause!.value = false;
         _isSliderEnable!.value = false;
@@ -181,6 +180,7 @@ class _RiveWidgetState extends ConsumerState<RiveWidget> with TickerProviderStat
         break;
       case AppState.play:
         print('AppState.play');
+        _countType!.value = 0;
         _isPlay!.value = true;
         _isPause!.value = false;
         _isSliderEnable!.value = false;
@@ -193,6 +193,7 @@ class _RiveWidgetState extends ConsumerState<RiveWidget> with TickerProviderStat
         break;
       case AppState.pause:
         print('AppState.pause');
+        _countType!.value = 0;
         _isPlay!.value = true;
         _isPause!.value = true;
         _isSliderEnable!.value = false;
@@ -205,22 +206,19 @@ class _RiveWidgetState extends ConsumerState<RiveWidget> with TickerProviderStat
         break;
       case AppState.complete:
         print('AppState.complete');
+        _sunRise!.value = 100;
+        _isPlay!.value = false;
+        _isPause!.value = false;
+        _isSliderEnable!.value = false;
+        _isSunRotate!.value = false;
+        _isSunStartRotate!.value = false;
+        _isShowReset!.value = false;
+        _isAppearStart!.value = false;
         _isComplete!.value = true;
         break;
       default:
         break;
     }
-  }
-
-  @override
-  initState() {
-    super.initState();
-    // _sliderController = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
-    // _sliderController.addListener(() {
-    //   if (_slider != null) {
-    //     _slider!.value = _sliderController.value * 60;
-    //   }
-    // });
   }
 
   @override
@@ -230,16 +228,8 @@ class _RiveWidgetState extends ConsumerState<RiveWidget> with TickerProviderStat
     super.dispose();
   }
 
-  void loadTimerModel() {
-    ref.read(timerViewModelProvider.notifier).loadTimerModel();
-  }
-
-  // void updateSliderValue(double delta) {
-  //   if (_slider != null && widget.timerState.timerModel.appState != AppState.play && _isSetting!.value == true) {
-  //     _slider!.value = (_slider!.value - delta * 70).clamp(0, 60);
-  //     final convertedMinutes = (_slider!.value).toInt();
-  //     ref.read(timerViewModelProvider.notifier).updateDisplayMinutes(convertedMinutes);
-  //   }
+  // void loadTimerModel() {
+  //   ref.read(timerViewModelProvider.notifier).loadTimerModel();
   // }
 
   @override
@@ -247,12 +237,7 @@ class _RiveWidgetState extends ConsumerState<RiveWidget> with TickerProviderStat
     final w = MediaQuery.sizeOf(context).width;
     final h = MediaQuery.sizeOf(context).height;
     final _timerState = ref.watch(timerViewModelProvider);
-
     final _isRiveBuilded = useState(false);
-
-    // void updateRiveDisplayMinutes() {
-    //   _updateRiveDisplayMinutes(_timerState.displayMinutes);
-    // }
 
     void calculateSunPosition(Duration remainingDuration) {
       final progressRate = remainingDuration.inMilliseconds / widget.timerState.timerModel.settingMinutes / 60000;
@@ -270,7 +255,7 @@ class _RiveWidgetState extends ConsumerState<RiveWidget> with TickerProviderStat
     }
 
     useEffect(() {
-      loadTimerModel();
+      // loadTimerModel();
 
       /// 常時更新用
       _tickTimer = Timer.periodic(const Duration(milliseconds: 30), (Timer t) {
@@ -291,11 +276,6 @@ class _RiveWidgetState extends ConsumerState<RiveWidget> with TickerProviderStat
       };
     }, []);
 
-    // useEffect(() {
-    //   if (_timerState.timerModel.appState == AppState.play) return;
-    //   updateRiveDisplayMinutes();
-    //   return null;
-    // }, [_timerState.displayMinutes]);
     useEffect(() {
       if (!_isRiveBuilded.value) return;
       updateRiveState();
@@ -307,6 +287,7 @@ class _RiveWidgetState extends ConsumerState<RiveWidget> with TickerProviderStat
       _updateRiveDisplayMinutes();
       return null;
     }, [_timerState.displayMinutes]);
+
     return Stack(
       children: [
         Center(

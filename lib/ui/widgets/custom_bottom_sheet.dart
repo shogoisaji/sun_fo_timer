@@ -9,6 +9,7 @@ import 'package:sun_fo_timer/string.dart';
 import 'package:sun_fo_timer/ui/config/color_theme.dart';
 import 'package:sun_fo_timer/ui/config/my_text_style.dart';
 import 'package:sun_fo_timer/ui/timer/view_model/timer_state.dart';
+import 'package:sun_fo_timer/ui/timer/view_model/timer_view_model.dart';
 import 'package:sun_fo_timer/util/brightness_util.dart';
 
 class CustomBottomSheet extends HookConsumerWidget {
@@ -21,23 +22,18 @@ class CustomBottomSheet extends HookConsumerWidget {
     final _pref = ref.read(sharedPreferencesRepositoryProvider);
     final _startTimeString =
         state.timerModel.startTime != null ? state.timerModel.startTime!.toString().toYMDHMString() : '-';
-    final _brightness = useState(0.0);
+    final _brightness = ref.watch(timerViewModelProvider).myBrightness;
     final _isCustomBrightness = useState(true);
-
     useEffect(() {
-      _pref.getDouble(SharedPreferencesKey.brightness).then((value) {
-        if (value != null) {
-          _brightness.value = value;
-          _isCustomBrightness.value = true;
-          BrightnessUtil().setBrightness(value);
-        } else {
-          _isCustomBrightness.value = false;
-        }
-      });
+      if (_brightness != null) {
+        _isCustomBrightness.value = true;
+      } else {
+        _isCustomBrightness.value = false;
+      }
       return null;
-    }, const []);
+    }, [_brightness]);
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 32),
+      padding: const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 32),
       child: Container(
         width: width,
         padding: const EdgeInsets.all(12),
@@ -75,6 +71,44 @@ class CustomBottomSheet extends HookConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
+              const Text('背景色', style: MyTextStyle.bottomSheetStyle),
+              const SizedBox(height: 2),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: Colors.blueGrey.shade100,
+                ),
+                margin: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 2.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    ...List.generate(
+                        ColorTheme.bgColors.length,
+                        (index) => GestureDetector(
+                              onTap: () {
+                                HapticFeedback.lightImpact();
+                                ref.read(timerViewModelProvider.notifier).changeBgColor(index);
+                              },
+                              child: Container(
+                                height: 30,
+                                width: (width - 150) / ColorTheme.bgColors.length,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      Color(ColorTheme.bgColors[index][0]),
+                                      Color(ColorTheme.bgColors[index][1]),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ))
+                  ],
+                ),
+              ),
               const Text('画面の明るさ', style: MyTextStyle.bottomSheetStyle),
               const SizedBox(height: 2),
               Container(
@@ -99,9 +133,10 @@ class CustomBottomSheet extends HookConsumerWidget {
                       }),
                       onChanged: (value) async {
                         _isCustomBrightness.value = value;
-                        HapticFeedback.selectionClick();
+                        HapticFeedback.lightImpact();
                         if (value) {
-                          BrightnessUtil().setBrightness(_brightness.value);
+                          if (_brightness == null) return;
+                          BrightnessUtil().setBrightness(_brightness);
                         } else {
                           _pref.clearPref(SharedPreferencesKey.brightness);
                           BrightnessUtil().resetBrightness();
@@ -110,12 +145,12 @@ class CustomBottomSheet extends HookConsumerWidget {
                     ),
                     Expanded(
                       child: Slider(
-                        value: _brightness.value,
+                        value: _brightness ?? 0,
                         onChanged: (value) async {
                           if (!_isCustomBrightness.value) return;
-                          _brightness.value = value;
+                          ref.read(timerViewModelProvider.notifier).setBrightness(value);
                           BrightnessUtil().setBrightness(value);
-                          HapticFeedback.selectionClick();
+                          HapticFeedback.lightImpact();
                           await _pref.setDouble(SharedPreferencesKey.brightness, value);
                         },
                         activeColor: _isCustomBrightness.value ? Colors.blueGrey.shade800 : Colors.blueGrey.shade400,
@@ -123,7 +158,7 @@ class CustomBottomSheet extends HookConsumerWidget {
                         min: 0,
                         max: 0.5,
                         divisions: 10,
-                        label: _isCustomBrightness.value ? (_brightness.value * 20).toStringAsFixed(0) : null,
+                        label: _isCustomBrightness.value ? ((_brightness ?? 0) * 20).toStringAsFixed(0) : null,
                       ),
                     ),
                   ],
@@ -143,6 +178,56 @@ class CustomBottomSheet extends HookConsumerWidget {
               Text(
                   '一時停止    ${state.timerModel.pauseAmount.inMinutes}分 ${state.timerModel.appState == AppState.pause ? '再開後に加算' : ''}',
                   style: MyTextStyle.bottomSheetStyle),
+              const Divider(
+                color: Colors.grey,
+                thickness: 0.5,
+              ),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blueGrey.shade100,
+                  ),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        backgroundColor: Colors.blueGrey.shade100,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        title: const Text('確認'),
+                        content: const Text('タイマーをリセットしますか？'),
+                        actions: <Widget>[
+                          Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.all(0),
+                              ),
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: Text('キャンセル', style: TextStyle(color: Colors.blueGrey.shade800, fontSize: 16)),
+                            ),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blueGrey.shade600,
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              ),
+                              onPressed: () {
+                                Navigator.pop(context);
+                                ref.read(timerViewModelProvider.notifier).resetTimer();
+                              },
+                              child: const Text('リセット', style: MyTextStyle.bottomSheetStyle),
+                            ),
+                          ]),
+                        ],
+                      ),
+                    );
+                  },
+                  child: Text('タイマーリセット', style: MyTextStyle.bottomSheetStyleDark),
+                ),
+              ),
             ],
           ),
         ),

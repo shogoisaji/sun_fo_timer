@@ -18,28 +18,28 @@ class SharedPreferencesRepository {
 
   Future<String?> getString(SharedPreferencesKey key) async {
     final String? value = _prefs.getString(key.value);
-    print('SharedPreferencesRepository getString: $value');
+    print('SharedPreferencesRepository key:${key.value} getString: $value');
     return value;
   }
 
   Future<double?> getDouble(SharedPreferencesKey key) async {
     final double? value = _prefs.getDouble(key.value);
-    print('SharedPreferencesRepository getDouble: $value');
+    print('SharedPreferencesRepository key:${key.value} getDouble: $value');
     return value;
   }
 
   Future<bool> setString(SharedPreferencesKey key, String value) async {
-    print('SharedPreferencesRepository setString: $value');
+    print('SharedPreferencesRepository key:${key.value} setString: $value');
     return _prefs.setString(key.value, value);
   }
 
   Future<bool> setDouble(SharedPreferencesKey key, double value) async {
-    print('SharedPreferencesRepository setDouble: $value');
+    print('SharedPreferencesRepository key:${key.value} setDouble: $value');
     return _prefs.setDouble(key.value, value);
   }
 
   Future<bool> clearPref(SharedPreferencesKey key) async {
-    print('SharedPreferencesRepository clearString');
+    print('SharedPreferencesRepository clear key:${key.value}');
     return _prefs.remove(key.value);
   }
 }
