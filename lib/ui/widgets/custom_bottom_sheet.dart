@@ -141,7 +141,6 @@ class CustomBottomSheet extends HookConsumerWidget {
                         } else {
                           _pref.clearPref(SharedPreferencesKey.brightness);
                           ref.read(timerViewModelProvider.notifier).clearBrightness();
-                          BrightnessUtil().resetBrightness();
                         }
                       },
                     ),
@@ -151,7 +150,7 @@ class CustomBottomSheet extends HookConsumerWidget {
                         onChanged: (value) async {
                           if (!_isCustomBrightness.value) return;
                           ref.read(timerViewModelProvider.notifier).setBrightness(value);
-                          BrightnessUtil().setBrightness(value);
+                          // BrightnessUtil().setBrightness(value);
                           HapticFeedback.lightImpact();
                           await _pref.setDouble(SharedPreferencesKey.brightness, value);
                         },
