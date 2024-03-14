@@ -110,8 +110,8 @@ class _RiveWidgetState extends ConsumerState<RiveWidget> with TickerProviderStat
     _isComplete!.value = false;
   }
 
-  void updateRiveState() {
-    switch (widget.timerState.timerModel.appState) {
+  void updateRiveState(AppState appState) {
+    switch (appState) {
       case AppState.idle:
         print('AppState.idle');
         WakelockPlus.toggle(enable: false);
@@ -251,12 +251,13 @@ class _RiveWidgetState extends ConsumerState<RiveWidget> with TickerProviderStat
 
     useEffect(() {
       if (!_isRiveBuilded.value) return;
-      updateRiveState();
+      updateRiveState(_timerState.timerModel.appState);
       return null;
     }, [_timerState.timerModel.appState]);
 
     useEffect(() {
       _updateRiveDisplayMinutes();
+      print('ppppppppdisplayMinutes: ${_timerState.displayMinutes}');
       return null;
     }, [_timerState.displayMinutes]);
 
