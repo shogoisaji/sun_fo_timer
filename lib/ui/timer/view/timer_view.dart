@@ -4,6 +4,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sun_fo_timer/ui/config/color_theme.dart';
 import 'package:sun_fo_timer/ui/timer/view_model/timer_view_model.dart';
 import 'package:sun_fo_timer/ui/widgets/rive_widget.dart';
+import 'package:sun_fo_timer/util/app_lifecycle_state_provider.dart';
+import 'package:sun_fo_timer/util/brightness_util.dart';
 
 class TimerView extends HookConsumerWidget {
   const TimerView({super.key});
@@ -12,6 +14,9 @@ class TimerView extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final _timerState = ref.watch(timerViewModelProvider);
     final _bgColorIndex = _timerState.bgColor;
+    final _brightness = _timerState.myBrightness;
+
+    final _isResumed = ref.watch(appLifecycleStateProvider) == AppLifecycleState.resumed;
 
     void getCurrentAnimation(String animationName) {
       ref.read(timerViewModelProvider.notifier).getCurrentAnimation(animationName);
@@ -30,7 +35,15 @@ class TimerView extends HookConsumerWidget {
     useEffect(() {
       initialLoad();
       return;
-    }, []);
+    }, [_isResumed]);
+    useEffect(() {
+      if (_brightness == null) {
+        BrightnessUtil().resetBrightness();
+      } else {
+        BrightnessUtil().setBrightness(_brightness);
+      }
+      return;
+    }, [_brightness]);
 
     return Scaffold(
       body: Container(

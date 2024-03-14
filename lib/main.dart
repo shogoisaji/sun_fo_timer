@@ -3,12 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sun_fo_timer/repository/shared_preferences_repository.dart';
 import 'package:sun_fo_timer/ui/timer/view/timer_view.dart';
-import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  WakelockPlus.enable();
   late final SharedPreferences sharedPreferences;
   sharedPreferences = await SharedPreferences.getInstance();
   SystemChrome.setPreferredOrientations([
@@ -32,7 +30,7 @@ class MyApp extends StatelessWidget {
         fontFamily: 'Kiwi_Maru',
       ),
       debugShowCheckedModeBanner: false,
-      home: TimerView(),
+      home: const TimerView(),
     );
   }
 }

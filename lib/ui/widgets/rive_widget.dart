@@ -8,6 +8,7 @@ import 'package:sun_fo_timer/models/app_state.dart';
 import 'package:sun_fo_timer/ui/timer/view_model/timer_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sun_fo_timer/ui/timer/view_model/timer_view_model.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 class RiveWidget extends StatefulHookConsumerWidget {
   final TimerState timerState;
@@ -109,10 +110,11 @@ class _RiveWidgetState extends ConsumerState<RiveWidget> with TickerProviderStat
     _isComplete!.value = false;
   }
 
-  void updateRiveState() {
-    switch (widget.timerState.timerModel.appState) {
+  void updateRiveState(AppState appState) {
+    switch (appState) {
       case AppState.idle:
         print('AppState.idle');
+        WakelockPlus.toggle(enable: false);
         _countType!.value = widget.timerState.countType.toDouble();
         _sunRise!.value = 100;
         _slider!.value = 100;
@@ -128,6 +130,7 @@ class _RiveWidgetState extends ConsumerState<RiveWidget> with TickerProviderStat
 
       case AppState.standby:
         print('AppState.standby');
+        WakelockPlus.toggle(enable: false);
         _sunRise!.value = 100;
         _isPlay!.value = false;
         _isPause!.value = false;
@@ -153,6 +156,7 @@ class _RiveWidgetState extends ConsumerState<RiveWidget> with TickerProviderStat
         break;
       case AppState.play:
         print('AppState.play');
+        WakelockPlus.toggle(enable: true);
         _countType!.value = 0;
         _isPlay!.value = true;
         _isPause!.value = false;
@@ -166,6 +170,7 @@ class _RiveWidgetState extends ConsumerState<RiveWidget> with TickerProviderStat
         break;
       case AppState.pause:
         print('AppState.pause');
+        WakelockPlus.toggle(enable: false);
         _countType!.value = 0;
         _isPlay!.value = true;
         _isPause!.value = true;
@@ -179,6 +184,7 @@ class _RiveWidgetState extends ConsumerState<RiveWidget> with TickerProviderStat
         break;
       case AppState.complete:
         print('AppState.complete');
+        WakelockPlus.toggle(enable: false);
         _sunRise!.value = 100;
         _isPlay!.value = false;
         _isPause!.value = false;
@@ -245,7 +251,7 @@ class _RiveWidgetState extends ConsumerState<RiveWidget> with TickerProviderStat
 
     useEffect(() {
       if (!_isRiveBuilded.value) return;
-      updateRiveState();
+      updateRiveState(_timerState.timerModel.appState);
       return null;
     }, [_timerState.timerModel.appState]);
 

@@ -160,7 +160,30 @@ class TimerViewModel extends _$TimerViewModel {
       print('loaded TimerModel : null');
       return;
     }
+    print('loaded TimerModel : ${_fetchTimerModel.appState}');
     switch (_fetchTimerModel.appState) {
+      case AppState.idle:
+        state = const TimerState(timerModel: TimerModel(appState: AppState.idle));
+        break;
+      case AppState.standby:
+        print('repository timerModel is standby: ${_fetchTimerModel.settingMinutes} minutes');
+        state = state.copyWith(timerModel: _fetchTimerModel, displayMinutes: _fetchTimerModel.settingMinutes);
+        break;
+      case AppState.start:
+        if (_fetchTimerModel.startTime == null) {
+          print('repository timerModel is start -> startTime is null -> resetTimer');
+          resetTimer();
+          break;
+        }
+        final _endDateTime = _fetchTimerModel.startTime!
+            .add(Duration(minutes: _fetchTimerModel.settingMinutes) + _fetchTimerModel.pauseAmount);
+        if (DateTime.now().isAfter(_endDateTime)) {
+          print('repository timerModel is play -> completed');
+          state = state.copyWith(timerModel: _fetchTimerModel.copyWith(appState: AppState.complete), displayMinutes: 0);
+        } else {
+          state = state.copyWith(timerModel: _fetchTimerModel.copyWith(appState: AppState.play));
+        }
+        break;
       case AppState.play:
         if (_fetchTimerModel.startTime == null) {
           print('repository timerModel is play -> startTime is null -> resetTimer');
@@ -172,19 +195,10 @@ class TimerViewModel extends _$TimerViewModel {
         if (DateTime.now().isAfter(_endDateTime)) {
           print('repository timerModel is play -> completed');
           state = state.copyWith(timerModel: _fetchTimerModel.copyWith(appState: AppState.complete), displayMinutes: 0);
+        } else {
+          state = state.copyWith(timerModel: _fetchTimerModel);
         }
         break;
-
-      case AppState.complete:
-        print('repository timerModel is completed');
-        resetTimer();
-        break;
-
-      case AppState.standby:
-        print('repository timerModel is standby: ${_fetchTimerModel.settingMinutes} minutes');
-        state = state.copyWith(timerModel: _fetchTimerModel, displayMinutes: _fetchTimerModel.settingMinutes);
-        break;
-
       case AppState.pause:
         print('repository timerModel is pause');
         state = state.copyWith(timerModel: _fetchTimerModel);
@@ -196,11 +210,14 @@ class TimerViewModel extends _$TimerViewModel {
         });
         break;
 
+      case AppState.complete:
+        print('repository timerModel is completed');
+        resetTimer();
+        break;
+
       default:
         break;
     }
-    print('loaded TimerModel : ${_fetchTimerModel.appState}');
-    state = state.copyWith(timerModel: _fetchTimerModel);
   }
 
   void setBrightness(double brightness) {
