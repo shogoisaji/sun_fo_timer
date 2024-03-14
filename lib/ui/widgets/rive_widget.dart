@@ -257,7 +257,6 @@ class _RiveWidgetState extends ConsumerState<RiveWidget> with TickerProviderStat
 
     useEffect(() {
       _updateRiveDisplayMinutes();
-      print('ppppppppdisplayMinutes: ${_timerState.displayMinutes}');
       return null;
     }, [_timerState.displayMinutes]);
 

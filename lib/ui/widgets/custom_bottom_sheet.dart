@@ -50,7 +50,7 @@ class CustomBottomSheet extends HookConsumerWidget {
               color: Colors.black.withOpacity(0.4),
               spreadRadius: 5,
               blurRadius: 10,
-              offset: const Offset(0, 5), // changes position of shadow
+              offset: const Offset(0, 5),
             ),
           ],
         ),
@@ -150,7 +150,6 @@ class CustomBottomSheet extends HookConsumerWidget {
                         onChanged: (value) async {
                           if (!_isCustomBrightness.value) return;
                           ref.read(timerViewModelProvider.notifier).setBrightness(value);
-                          // BrightnessUtil().setBrightness(value);
                           HapticFeedback.lightImpact();
                           await _pref.setDouble(SharedPreferencesKey.brightness, value);
                         },
