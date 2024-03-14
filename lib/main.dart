@@ -8,7 +8,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  WakelockPlus.enable();
+  // WakelockPlus.enable();
   late final SharedPreferences sharedPreferences;
   sharedPreferences = await SharedPreferences.getInstance();
   SystemChrome.setPreferredOrientations([
