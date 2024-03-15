@@ -155,7 +155,7 @@ class TimerViewModel extends _$TimerViewModel {
 
   Future<void> loadTimerModel() async {
     final _fetchTimerModel = await fetchTimerModel();
-    await Future.delayed(const Duration(milliseconds: 0), () {}); // build後に実行される
+    await Future.delayed(const Duration(milliseconds: 1000), () {}); // 0millisecondsだとidleが最後に入ってしまう
     if (_fetchTimerModel == null) {
       print('loaded TimerModel : null');
       return;
