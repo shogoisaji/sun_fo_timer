@@ -12,11 +12,11 @@ class TimerView extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final _timerState = ref.watch(timerViewModelProvider);
-    final _bgColorIndex = _timerState.bgColor;
-    final _brightness = _timerState.myBrightness;
+    final timerState = ref.watch(timerViewModelProvider);
+    final bgColorIndex = timerState.bgColor;
+    final brightness = timerState.myBrightness;
 
-    final _isResumed = ref.watch(appLifecycleStateProvider) == AppLifecycleState.resumed;
+    final isResumed = ref.watch(appLifecycleStateProvider) == AppLifecycleState.resumed;
 
     void getCurrentAnimation(String animationName) {
       ref.read(timerViewModelProvider.notifier).getCurrentAnimation(animationName);
@@ -32,18 +32,28 @@ class TimerView extends HookConsumerWidget {
       ref.read(timerViewModelProvider.notifier).loadTimerModel();
     }
 
+    void rotateInit() {
+      Future.delayed(const Duration(milliseconds: 500), () {
+        ref.read(timerViewModelProvider.notifier).loadTimerModel();
+      });
+    }
+
+    useEffect(() {
+      rotateInit();
+      return;
+    }, [isResumed]);
     useEffect(() {
       initialLoad();
       return;
-    }, [_isResumed]);
+    }, [isResumed]);
     useEffect(() {
-      if (_brightness == null) {
+      if (brightness == null) {
         BrightnessUtil().resetBrightness();
       } else {
-        BrightnessUtil().setBrightness(_brightness);
+        BrightnessUtil().setBrightness(brightness);
       }
       return;
-    }, [_brightness]);
+    }, [brightness]);
 
     return Scaffold(
       body: Container(
@@ -52,8 +62,8 @@ class TimerView extends HookConsumerWidget {
             begin: const Alignment(-1.5, -1.0),
             end: const Alignment(1.5, 1.0),
             colors: [
-              Color(ColorTheme.bgColors[_bgColorIndex][0]),
-              Color(ColorTheme.bgColors[_bgColorIndex][1]),
+              Color(ColorTheme.bgColors[bgColorIndex][0]),
+              Color(ColorTheme.bgColors[bgColorIndex][1]),
             ],
           ),
         ),
@@ -65,7 +75,7 @@ class TimerView extends HookConsumerWidget {
                   width: double.infinity,
                   height: double.infinity,
                   child: RiveWidget(
-                    timerState: _timerState,
+                    timerState: timerState,
                     getCurrentAnimation: getCurrentAnimation,
                   ),
                 ),
