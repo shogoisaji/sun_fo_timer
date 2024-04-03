@@ -210,10 +210,10 @@ class _RiveWidgetState extends ConsumerState<RiveWidget> with TickerProviderStat
   @override
   Widget build(BuildContext context) {
     final w = MediaQuery.sizeOf(context).width;
-    final h = MediaQuery.sizeOf(context).height;
-    final _timerState = ref.watch(timerViewModelProvider);
-    final _isRiveBuilded = useState(false);
+    final orientation = MediaQuery.of(context).orientation;
 
+    final timerState = ref.watch(timerViewModelProvider);
+    final isRiveBuilded = useState(false);
     void calculateSunPosition(Duration remainingDuration) {
       final progressRate = remainingDuration.inMilliseconds / widget.timerState.timerModel.settingMinutes / 60000;
       if (progressRate < 0.0) {
@@ -233,10 +233,10 @@ class _RiveWidgetState extends ConsumerState<RiveWidget> with TickerProviderStat
       /// 常時更新用
       _tickTimer = Timer.periodic(const Duration(milliseconds: 30), (Timer t) {
         /// Rive Widget Build Check
-        if (_isPlay != null && !_isRiveBuilded.value) {
-          _isRiveBuilded.value = true;
+        if (_isPlay != null && !isRiveBuilded.value) {
+          isRiveBuilded.value = true;
         }
-        if (!_isRiveBuilded.value || widget.timerState.timerModel.appState != AppState.play) return;
+        if (!isRiveBuilded.value || widget.timerState.timerModel.appState != AppState.play) return;
         updateDisplayMinutes();
       });
 
@@ -250,46 +250,45 @@ class _RiveWidgetState extends ConsumerState<RiveWidget> with TickerProviderStat
     }, []);
 
     useEffect(() {
-      if (!_isRiveBuilded.value) return;
-      updateRiveState(_timerState.timerModel.appState);
+      if (!isRiveBuilded.value) return;
+      Future.delayed(const Duration(milliseconds: 300), () {
+        updateRiveState(timerState.timerModel.appState);
+        _updateRiveDisplayMinutes();
+      });
+      print('updateRiveState');
       return null;
-    }, [_timerState.timerModel.appState]);
+    }, [orientation]);
+
+    useEffect(() {
+      if (!isRiveBuilded.value) return;
+      updateRiveState(timerState.timerModel.appState);
+      print('updateRiveState');
+      return null;
+    }, [timerState.timerModel.appState]);
 
     useEffect(() {
       _updateRiveDisplayMinutes();
       return null;
-    }, [_timerState.displayMinutes]);
+    }, [timerState.displayMinutes]);
 
     return Stack(
       children: [
-        Center(
-          child: Row(
-            children: [
-              Expanded(
-                child: Container(
-                  color: Colors.transparent,
+        w > 500
+            ? RiveAnimation.asset(
+                'assets/rive/time_v2.riv',
+                artboard: 'timer_w',
+                fit: BoxFit.contain,
+                onInit: _onRiveInit,
+              )
+            : Transform.scale(
+                scale: 1.3,
+                child: RiveAnimation.asset(
+                  'assets/rive/time_v2.riv',
+                  artboard: 'timer_w',
+                  fit: BoxFit.contain,
+                  onInit: _onRiveInit,
                 ),
               ),
-              SizedBox(
-                width: w > h ? null : w,
-                height: w > h ? h : null,
-                child: AspectRatio(
-                  aspectRatio: 740 / 1200,
-                  child: RiveAnimation.asset(
-                    'assets/rive/time.riv',
-                    fit: BoxFit.contain,
-                    onInit: _onRiveInit,
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Container(
-                  color: Colors.transparent,
-                ),
-              ),
-            ],
-          ),
-        ),
       ],
     );
   }
