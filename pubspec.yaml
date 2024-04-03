@@ -2,7 +2,8 @@ name: sun_fo_timer
 description: 'A new Flutter project.'
 publish_to: 'none'
 
-version: 1.0.2+3
+# rive animation update
+version: 1.0.3+1
 
 environment:
     sdk: '>=3.2.6 <4.0.0'
